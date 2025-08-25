@@ -1,0 +1,14 @@
+spring:
+  profiles:
+    #环境
+    active: dev
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.66.103:8848
+        #命名空间
+        namespace: 225faf4f-ca52-48d2-9a3d-6aec70ec1950
+        #配置文件类型
+        file-extension: yaml
+        #配置文件名称
+        prefix: shopping_manager_api
