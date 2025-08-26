@@ -22,6 +22,9 @@
     </properties>
     <modules>
         <module>shopping_common</module>
+        <module>shopping_admin_service</module>
+        <module>shopping_goods_service</module>
+        <module>shopping_manager_api</module>
     </modules>
     <dependencyManagement>
         <dependencies>

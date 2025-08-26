@@ -11,4 +11,4 @@ spring:
         #文件类型
         file-extension: yaml
         #配置文件名称
-        prefix: shopping_goods_service
+        prefix: shopping_admin_service
