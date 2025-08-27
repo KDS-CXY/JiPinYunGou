@@ -4,8 +4,17 @@ import com.baizhanshopping.shopping_common.pojo.Admin;
 import com.baizhanshopping.shopping_common.result.BaseRsult;
 import com.baizhanshopping.shopping_common.service.AdminService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.netty.util.internal.StringUtil;
 import lombok.extern.java.Log;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
     @DubboReference
     private AdminService adminService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * 添加管理员
@@ -21,7 +32,9 @@ public class AdminController {
      */
     @PostMapping("/add")
     public BaseRsult add(@RequestBody Admin admin){
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         adminService.addAdmin(admin);
+
         return BaseRsult.success();
     }
 
@@ -30,8 +43,11 @@ public class AdminController {
      * @param admin 前端传过来的admin参数
      * @return 返回BaseRsult统一结果集
      */
-    @PostMapping("/update")
+    @PutMapping("/update")
     public BaseRsult update(@RequestBody Admin admin){
+        if(StringUtils.hasText(admin.getPassword())){
+            admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+        }
         adminService.updateAdmin(admin);
         return BaseRsult.success();
     }
@@ -66,6 +82,7 @@ public class AdminController {
      */
     //分页查询别忘了配置分页插件
     @GetMapping("/search")
+    @PreAuthorize("hasAnyAuthority('/admin/search')")
     public BaseRsult<Page<Admin>> search(int page,int size){
         Page<Admin> adminPage = adminService.search(page, size);
         return BaseRsult.success(adminPage);
@@ -77,9 +94,21 @@ public class AdminController {
      * @param rids 更新的角色id数组
      * @return 返回BaseRsult统一结果集
      */
-    @PostMapping("/updateRoleToAdmin")
+    @PutMapping("/updateRoleToAdmin")
     public BaseRsult updateRoleToAdmin(Long aid,Long[] rids){
         adminService.updateRoleToAdmin(aid,rids);
         return BaseRsult.success();
+    }
+    /**
+     * 获取当前登录的用户名
+     * @return 返回BaseRsult统一结果集
+     */
+    @GetMapping("/getUsername")
+    public BaseRsult<String> getUsername(){
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        UserDetails userDetails = (UserDetails)authentication.getPrincipal();
+        String username = userDetails.getUsername();
+        return BaseRsult.success(username);
     }
 }
