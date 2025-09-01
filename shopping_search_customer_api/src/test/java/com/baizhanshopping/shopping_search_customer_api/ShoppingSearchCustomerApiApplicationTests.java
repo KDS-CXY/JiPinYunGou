@@ -1,10 +1,10 @@
-package com.baizhanshopping.shopping_category_customer_api;
+package com.baizhanshopping.shopping_search_customer_api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ShoppingCategoryCustomerApiApplicationTests {
+class ShoppingSearchCustomerApiApplicationTests {
 
     @Test
     void contextLoads() {

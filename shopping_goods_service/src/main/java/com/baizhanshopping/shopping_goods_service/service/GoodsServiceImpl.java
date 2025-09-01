@@ -1,15 +1,15 @@
 package com.baizhanshopping.shopping_goods_service.service;
 
-import com.baizhanshopping.shopping_common.pojo.Goods;
-import com.baizhanshopping.shopping_common.pojo.GoodsImage;
-import com.baizhanshopping.shopping_common.pojo.Specification;
-import com.baizhanshopping.shopping_common.pojo.SpecificationOption;
+import com.baizhanshopping.shopping_common.pojo.*;
 import com.baizhanshopping.shopping_common.service.GoodsService;
+import com.baizhanshopping.shopping_common.service.SearchService;
 import com.baizhanshopping.shopping_goods_service.mapper.GoodsImageMapper;
 import com.baizhanshopping.shopping_goods_service.mapper.GoodsMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -21,6 +21,10 @@ public class GoodsServiceImpl implements GoodsService {
     private GoodsMapper goodsMapper;
     @Autowired
     private GoodsImageMapper goodsImageMapper;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+    private final String SYNC_GOODS_QUEUE = "sync_goods_queue";
+    private final String DEL_GOODS_QUEUE = "del_goods_queue";
     @Override
     public void add(Goods goods) {
         goodsMapper.insert(goods);
@@ -42,6 +46,9 @@ public class GoodsServiceImpl implements GoodsService {
                 goodsMapper.addGoodsSpecificationOption(goodsId,specificationOption.getId());
             });
         });
+        //同步添加到ES中
+        GoodsDesc desc = findDesc(goodsId);
+        rocketMQTemplate.syncSend(SYNC_GOODS_QUEUE,desc);
     }
 
     @Override
@@ -74,6 +81,10 @@ public class GoodsServiceImpl implements GoodsService {
         for (SpecificationOption option : options) {
             goodsMapper.addGoodsSpecificationOption(goodsId,option.getId());
         }
+        //同步添加到ES中
+        rocketMQTemplate.syncSend(DEL_GOODS_QUEUE,goodsId);
+        GoodsDesc desc = findDesc(goodsId);
+        rocketMQTemplate.syncSend(SYNC_GOODS_QUEUE,desc);
     }
 
 
@@ -85,6 +96,14 @@ public class GoodsServiceImpl implements GoodsService {
     @Override
     public void putAway(Long id, Boolean isMarketable) {
         goodsMapper.putAway(id,isMarketable);
+        //上架时同步添加到ES中
+        if (isMarketable){
+            GoodsDesc goodsDesc = findDesc(id);
+            rocketMQTemplate.syncSend(SYNC_GOODS_QUEUE,goodsDesc);
+        }else {
+            //下架时删除ES中的数据
+            rocketMQTemplate.syncSend(DEL_GOODS_QUEUE,id);
+        }
     }
 
     @Override
@@ -96,5 +115,15 @@ public class GoodsServiceImpl implements GoodsService {
         }
         Page<Goods> page1 = goodsMapper.selectPage(new Page(page, size), queryWrapper);
         return page1;
+    }
+
+    @Override
+    public List<GoodsDesc> findAll() {
+        return goodsMapper.findAll();
+    }
+
+    @Override
+    public GoodsDesc findDesc(Long id) {
+        return goodsMapper.findDesc(id);
     }
 }

@@ -1,4 +1,4 @@
-package com.baizhanshopping.shopping_category_customer_api;
+package com.baizhanshopping.shopping_search_customer_api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,10 +9,10 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 @EnableDiscoveryClient
 @RefreshScope
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-public class ShoppingCategoryCustomerApiApplication {
+public class ShoppingSearchCustomerApiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ShoppingCategoryCustomerApiApplication.class, args);
+        SpringApplication.run(ShoppingSearchCustomerApiApplication.class, args);
     }
 
 }

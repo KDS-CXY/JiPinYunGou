@@ -27,6 +27,9 @@
         <module>shopping_manager_api</module>
         <module>shopping_file_service</module>
         <module>shopping_category_service</module>
+        <module>shopping_category_customer_api</module>
+        <module>shopping_search_service</module>
+        <module>shopping_search_customer_api</module>
     </modules>
     <dependencyManagement>
         <dependencies>
