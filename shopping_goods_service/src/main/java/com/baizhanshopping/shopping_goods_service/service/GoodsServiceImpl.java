@@ -25,6 +25,10 @@ public class GoodsServiceImpl implements GoodsService {
     private RocketMQTemplate rocketMQTemplate;
     private final String SYNC_GOODS_QUEUE = "sync_goods_queue";
     private final String DEL_GOODS_QUEUE = "del_goods_queue";
+    // 同步商品到购物车主题
+    private final String SYNC_CART_QUEUE = "sync_cart_queue";
+    // 删除商品到购物车主题
+    private final String DEL_CART_QUEUE = "del_cart_queue";
     @Override
     public void add(Goods goods) {
         goodsMapper.insert(goods);
@@ -60,8 +64,6 @@ public class GoodsServiceImpl implements GoodsService {
         goodsImageMapper.delete(queryWrapper);
         // 删除旧规格项数据
         goodsMapper.deleteGoodsSpecificationOption(goodsId);
-
-
         // 插入商品数据
         goodsMapper.updateById(goods);
         // 插入图片数据
@@ -85,6 +87,13 @@ public class GoodsServiceImpl implements GoodsService {
         rocketMQTemplate.syncSend(DEL_GOODS_QUEUE,goodsId);
         GoodsDesc desc = findDesc(goodsId);
         rocketMQTemplate.syncSend(SYNC_GOODS_QUEUE,desc);
+        // 将商品数据同步到购物车中
+        CartGoods cartGoods = new CartGoods();
+        cartGoods.setGoodId(goods.getId());
+        cartGoods.setGoodsName(goods.getGoodsName());
+        cartGoods.setHeaderPic(goods.getHeaderPic());
+        cartGoods.setPrice(goods.getPrice());
+        rocketMQTemplate.syncSend(SYNC_CART_QUEUE,cartGoods);
     }
 
 
@@ -103,6 +112,8 @@ public class GoodsServiceImpl implements GoodsService {
         }else {
             //下架时删除ES中的数据
             rocketMQTemplate.syncSend(DEL_GOODS_QUEUE,id);
+            // 删除商品数据同步到购物车中
+            rocketMQTemplate.syncSend(DEL_CART_QUEUE,id);
         }
     }
 
