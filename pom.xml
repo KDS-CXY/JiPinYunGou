@@ -38,6 +38,8 @@
         <module>shopping_order_service</module>
         <module>shopping_order_customer_api</module>
         <module>shopping_pay_service</module>
+        <module>shopping_seckill_service</module>
+        <module>shopping_seckill_customer_api</module>
     </modules>
     <dependencyManagement>
         <dependencies>

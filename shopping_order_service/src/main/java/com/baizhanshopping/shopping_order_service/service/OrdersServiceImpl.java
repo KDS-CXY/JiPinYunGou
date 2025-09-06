@@ -24,7 +24,10 @@ public class OrdersServiceImpl implements OrderService {
     private final String CHECK_ORDERS_QUEUE= "check_orders_queue";
     @Override
     public Orders add(Orders orders) {
-        orders.setStatus(1);
+        // 订单状态未付款
+        if (orders.getStatus() == null){
+            orders.setStatus(1);
+        }
         orders.setCloseTime(new Date());
         List<CartGoods> cartGoods = orders.getCartGoods();
         BigDecimal sum=BigDecimal.ZERO;

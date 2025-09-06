@@ -24,7 +24,9 @@ public enum CodeEnum {
     LOGIN_NOPHONE_ERROR(610,"该手机号未注册"),
     LOGIN_USER_STATUS_ERROR(611,"用户状态异常"),
     QR_CODE_ERROR(612,"二维码生成错误"),
-    CHECK_SIGN_ERROR(612,"二维码生成错误")
+    CHECK_SIGN_ERROR(612,"二维码生成错误"),
+    NO_STOCK_ERROR(613,"库存不足"),
+    ORDER_EXPIRED_ERROR(614,"订单已过期")
     ;
     private final Integer code;
     private final String message;

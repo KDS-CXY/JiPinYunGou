@@ -65,6 +65,6 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<Permission> findAllPermission(String username) {
-        return adminMapper.findAllPermission(username);
+        return List.of();
     }
 }

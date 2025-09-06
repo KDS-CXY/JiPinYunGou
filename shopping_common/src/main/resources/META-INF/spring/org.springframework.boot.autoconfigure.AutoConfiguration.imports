@@ -1,2 +1,3 @@
 # 因为这个全局处理异常类与服务的启动类的包名不统一无法加载需要设置
 com.baizhanshopping.shopping_common.result.GlobalExceptionHandler
+com.baizhanshopping.shopping_common.result.MySentinelConfig
